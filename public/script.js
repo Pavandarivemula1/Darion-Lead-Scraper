@@ -9,12 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadBtn = document.getElementById('download-btn');
     const searchInput = document.getElementById('search-input');
     const tableBody = document.getElementById('table-body');
-    
+
     // Theme Toggle Elements
     const themeToggle = document.getElementById('theme-toggle');
     const moonIcon = document.getElementById('moon-icon');
     const sunIcon = document.getElementById('sun-icon');
-    
+
     // Metrics Elements
     const metricTotal = document.getElementById('metric-total');
     const metricHQ = document.getElementById('metric-hq');
@@ -35,14 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
             sunIcon.style.display = 'none';
         }
     };
-    
+
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
 
     themeToggle.addEventListener('click', () => {
         const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
+
         localStorage.setItem('theme', newTheme);
         applyTheme(newTheme);
     });
@@ -56,21 +56,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Configuration / API endpoint (works on same domain or specific host)
     // For Vercel production, you would point this to your Render/Railway backend.
-    const API_BASE = window.location.origin;
+    const API_BASE = "https://darion-lead-scraper.onrender.com";
 
     // Fetch available datasets
     async function fetchDatasets() {
         try {
             const res = await fetch(`${API_BASE}/api/leads`);
             const data = await res.json();
-            
+
             datasetSelect.innerHTML = '';
-            
+
             if (!data.datasets || data.datasets.length === 0) {
                 datasetSelect.innerHTML = '<option value="">No data available</option>';
                 return;
             }
-            
+
             datasetSelect.innerHTML = '<option value="">Select a dataset...</option>';
             data.datasets.forEach(file => {
                 const option = document.createElement('option');
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.textContent = cleanName;
                 datasetSelect.appendChild(option);
             });
-            
+
         } catch (error) {
             console.error('Error fetching datasets:', error);
             datasetSelect.innerHTML = '<option value="">Error loading datasets</option>';
@@ -90,17 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load Specific Dataset
     async function loadDataset(filename) {
         if (!filename) return;
-        
+
         tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Loading data...</td></tr>`;
-        
+
         try {
             const res = await fetch(`${API_BASE}/api/leads/${filename}`);
             const payload = await res.json();
-            
+
             currentDataset = payload.data;
             updateMetrics(payload.metrics);
             renderTable(currentDataset);
-            
+
             downloadBtn.disabled = false;
         } catch (error) {
             console.error('Error loading dataset:', error);
@@ -123,22 +123,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         tableBody.innerHTML = '';
-        
+
         data.forEach(row => {
             const tr = document.createElement('tr');
-            
+
             // Score Badge
             const score = row.score || 0;
             let scoreClass = 'score-low';
             if (score >= 70) scoreClass = 'score-high';
             else if (score >= 50) scoreClass = 'score-med';
-            
+
             // WA Badge
             const hasWA = row.has_whatsapp ? `<span class="wa-badge">✓ Yes</span>` : '<span style="color:var(--text-muted)">-</span>';
-            
+
             // Website link
             const website = row.website ? `<a href="${row.website}" target="_blank" style="color:var(--primary)">Visit Site</a>` : '-';
-            
+
             tr.innerHTML = `
                 <td><span class="score-badge ${scoreClass}">${score}</span></td>
                 <td style="font-weight: 500">${row.business_name || 'N/A'}</td>
@@ -155,14 +155,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Form Submission (Start Scraper)
     scrapeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const city = document.getElementById('city').value;
         const category = document.getElementById('category').value;
         const maxResults = document.getElementById('max-results').value;
-        
+
         // Show status
         statusIndicator.classList.remove('hidden');
-        
+
         try {
             const res = await fetch(`${API_BASE}/api/scrape`, {
                 method: 'POST',
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     max_results: parseInt(maxResults)
                 })
             });
-            
+
             if (res.ok) {
                 // Background job started
                 setTimeout(() => {
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     refreshBtn.addEventListener('click', () => {
         fetchDatasets();
-        if(datasetSelect.value) {
+        if (datasetSelect.value) {
             loadDataset(datasetSelect.value);
         }
     });
@@ -204,23 +204,23 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         if (!currentDataset.length) return;
-        
+
         const filtered = currentDataset.filter(row => {
             const nameMatch = row.business_name && String(row.business_name).toLowerCase().includes(term);
             const webMatch = row.website && String(row.website).toLowerCase().includes(term);
             return nameMatch || webMatch;
         });
-        
+
         renderTable(filtered);
     });
 
     // CSV Download mechanism (Client-side from loaded JSON)
     downloadBtn.addEventListener('click', () => {
         if (!currentDataset.length) return;
-        
+
         const headers = Object.keys(currentDataset[0]);
         const csvRows = [headers.join(',')];
-        
+
         currentDataset.forEach(row => {
             const values = headers.map(header => {
                 const val = String(row[header] || '');
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             csvRows.push(values.join(','));
         });
-        
+
         const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
