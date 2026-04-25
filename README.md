@@ -1,20 +1,20 @@
-# AntiGravity Lead Generation System
+# Darion Lead Generation System (AntiGravity)
 
-A high-scale lead generation engine in Python designed to identify businesses that require websites and WhatsApp automation services. It evaluates their digital presence and prioritizes them as targets for digital agencies.
+A high-scale lead generation engine designed to identify businesses that require digital presence (websites) or WhatsApp automation services. The system utilizes headless Chrome scraping to ingest high-value business leads, score them algorithmically 1-100, and present them in a premium web dashboard.
 
-## Features
-- **Headless Chrome Scraping** using Playwright.
-- **Infinite Scrolling & Pagination** natively supported via human-like actions.
-- **Data Qualification Algorithm** scoring leads 0-100 based on website presence, review activity, and unprofessional emails.
-- **WhatsApp Automation Detection** and personalized WA marketing message generation.
-- **MongoDB** integration for phone and website deduplication.
-- **CSV & Excel Outputs** for easy spreadsheet import.
+## 🏗️ Decoupled Architecture
 
-## Setup Instructions
+This application employs a split production architecture to circumvent heavy Cloud timeouts:
+1. **Frontend (Vercel)**: Based entirely inside the `public/` directory. It is a stunning, glassmorphic static HTML/CSS/JS interface packed with Light/Dark mode toggling and instant CSV downloading built via FastAPI calls.
+2. **Backend (Render, Railway)**: A `FastAPI` instance (`server.py`) acting as the API layer encapsulating `main.py`. This layer natively handles long-lived scraping operations that standard Vercel serverless functions natively block.
+
+---
+
+## 💻 Local Development
 
 ### 1. Prerequisites
 - Python 3.9+
-- MongoDB (Optional, for deduplicating saved records if running multiple times)
+- MongoDB (Optional, for deduplication. If unavailable, CSV extraction still works beautifully).
 
 ### 2. Environment Initialization
 ```bash
@@ -22,28 +22,39 @@ A high-scale lead generation engine in Python designed to identify businesses th
 python -m venv venv
 source venv/bin/activate
 
-# Install requirements
+# Install all required logic & API packages
 pip install -r requirements.txt
 
-# Install Playwright browser binaries
+# Crucial: Install Chromium browser binaries for infinite scroll
 playwright install chromium
 ```
 
-### 3. Execution (Example Run)
-You can run the script indicating the `city`, the `category` and the maximum amount of leads to gather `--max`.
-
+### 3. Launching the Web Portal
+Instead of directly hitting terminal commands, invoke the `uvicorn` development server. This runs your API backend and seamlessly serves the static UI payload immediately at your `localhost`.
 ```bash
-# Example: Gather Plumber leads in London
-python main.py --city "London" --category "Plumbers" --max 10
-
-# Example: Gathering fitness gyms
-python main.py --city "New York" --category "Gyms" --max 50
+uvicorn server:app --reload
 ```
+Open **[http://localhost:8000](http://localhost:8000)** to view the dashboard!
 
-## Modular Architecture (`src/`)
-- `scrapers/`: The extractors fetching raw data. `google_maps.py` implements a complex Playwright crawler solving the infinite scroll list.
-- `processors/`: Business logic. 
-  - `qualifier.py` scores the leads based on absence of website or unprofessional presence.
-  - `whatsapp.py` detects indicators of WA presence.
-  - `formatter.py` dynamically formats personalized WhatsApp outreach templates.
-- `storage/`: Persisting information. `db.py` uses AsyncIOMotor to dump un-duplicated data to MongoDB. `exporter.py` builds the CSV structure, sorted algorithmically by lead priority.
+*(Alternatively: headless terminal execution remains supported via `python main.py --city "London" --category "Plumbers" --max 10`).*
+
+---
+
+## 🚀 Production Deployment Guide
+
+### Backend → Render
+Deploy your heavy-lifting API backend securely:
+1. Push this repository to GitHub natively.
+2. Connect your Render account and spin up a new **Web Service**.
+3. The custom `Dockerfile` already natively forces Render to install Microsoft's official Playwright libraries and serve `uvicorn`. Choose **Docker** as your environment.
+4. Copy the output deployment web address (e.g. `https://darion-scraper.onrender.com`).
+
+### Frontend → Vercel
+Deploy your gorgeous static UI for extreme speed and global caching:
+1. Go to Vercel, attach this SAME GitHub repository, and start a deployment.
+2. The included `vercel.json` already natively halts Vercel's aggressive Python/FastAPI builders! It will immediately build pure static files from your `/public` folder.
+3. Once your Render Backend is live, edit `/public/script.js` (Line 60):
+   ```javascript
+   const API_BASE = "https://darion-scraper.onrender.com";
+   ```
+4. Push that edit to Git. Vercel automatically deploys it!
