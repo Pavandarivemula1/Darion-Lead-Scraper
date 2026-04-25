@@ -8,7 +8,7 @@ import pandas as pd
 from main import orchestrate
 import asyncio
 
-app = FastAPI(title="AntiGravity Lead Generation API")
+app = FastAPI(title="Darion Scrape API")
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,6 +1,6 @@
-# Darion Lead Generation System (AntiGravity)
+# Darion Scrape
 
-A high-scale lead generation engine designed to identify businesses that require digital presence (websites) or WhatsApp automation services. The system utilizes headless Chrome scraping to ingest high-value business leads, score them algorithmically 1-100, and present them in a premium web dashboard.
+A high-scale scraping engine designed to identify businesses that require digital presence (websites) or WhatsApp automation services. The system utilizes headless Chrome scraping to ingest high-value business leads, score them algorithmically 1-100, and present them in a premium web dashboard.
 
 ## 🏗️ Decoupled Architecture
 

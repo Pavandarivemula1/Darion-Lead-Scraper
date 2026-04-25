@@ -69,7 +69,7 @@ async def orchestrate(city: str, category: str, max_results: int = 20):
         logger.info("No leads found.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="High-Scale Lead Generation System")
+    parser = argparse.ArgumentParser(description="Darion Scrape System")
     parser.add_argument("--city", type=str, default="London", help="City to search in")
     parser.add_argument("--category", type=str, default="Plumbers", help="Business category")
     parser.add_argument("--max", type=int, default=10, help="Max results to scrape")
